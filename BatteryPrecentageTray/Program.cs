@@ -146,9 +146,6 @@ namespace BatteryPrecentageTray
             }
         }
 
-
-
-
         private static string GetBatteryPercentage()
         {
             ObjectQuery query = new ObjectQuery("Select * From Win32_Battery");
