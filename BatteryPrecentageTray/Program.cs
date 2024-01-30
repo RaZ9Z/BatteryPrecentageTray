@@ -19,6 +19,9 @@ namespace BatteryPrecentageTray
     {
         private static NotifyIcon notifyIcon = new NotifyIcon();
         private static Timer timer = new Timer();
+        private static Startup startup = new Startup();
+        private static ToolStripMenuItem startUpButton;
+        private static ToolStripMenuItem startUpStatus;
 
 
         public class PowerStatusListener
@@ -59,22 +62,37 @@ namespace BatteryPrecentageTray
 
         [STAThread]
         static void Main()
-        {
-           
+        {  
             System.Windows.Forms.Application.EnableVisualStyles();
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             PowerStatusListener powerStatusListener = new PowerStatusListener();
             powerStatusListener.ChargingStatusChanged += OnChargingStatusChanged;
-
+  
             notifyIcon = new NotifyIcon
             {
                 Icon = CreateIcon(GetBatteryPercentage()),
                 Visible = true,
                 Text = "Battery Percentage App",
             };
+
             ContextMenuStrip menu = new ContextMenuStrip();
-            menu.Items.Add(new ToolStripMenuItem("Exit", null, CloseApp));
+
+            startUpButton = new ToolStripMenuItem("Enable Run On Startup");
+            if (!startup.IsInStartup())
+            {
+                startUpButton.Click += RunOnStartup;
+            }
+            else
+            {
+                startUpButton.Text = "Disable Run On Startup";
+                startUpButton.Click += DisableStartup;
+            }
+            startUpStatus = new ToolStripMenuItem("Running On Startup: " + startup.IsInStartup());
+            menu.Items.Add(startUpStatus);
+            menu.Items.Add(startUpButton);
+            menu.Items.Add("Exit", null, CloseApp);
             notifyIcon.ContextMenuStrip = menu;
+            
             Timer timer = new Timer
             {
                 Interval = 60000, // Set the interval in milliseconds
@@ -91,6 +109,23 @@ namespace BatteryPrecentageTray
 
             
             Application.Run();
+        }
+
+        private static void DisableStartup(object sender, EventArgs e)
+        {
+            startup.RemoveFromStartup();
+            startUpButton.Text = "Enable Run On Startup";
+            startUpButton.Click += RunOnStartup;
+            startUpStatus.Text = "Running On Startup: " + startup.IsInStartup();
+        }
+
+        private static void RunOnStartup(object sender, EventArgs e)
+        {
+            startup.RunOnStartup();
+            startUpButton.Text = "Disable Run On Startup";
+            startUpButton.Click += DisableStartup;
+            startUpStatus.Text = "Running On Startup: " + startup.IsInStartup();
+
         }
 
         private static void CloseApp(object sender, EventArgs e)
@@ -160,5 +195,9 @@ namespace BatteryPrecentageTray
             return "N/A";
         }
     }
+    
+
+  
 }
+
 
