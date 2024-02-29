@@ -69,12 +69,17 @@ namespace BatteryPrecentageTray
             string batteryPercentage = GetBatteryPercentage();
             PowerStatus powerStatus = SystemInformation.PowerStatus;
             int timeLeft = powerStatus.BatteryLifeRemaining;
-            notifyIcon = new NotifyIcon
+            notifyIcon = new NotifyIcon();
+            notifyIcon.Icon = CreateIcon(GetBatteryPercentage());
+            notifyIcon.Visible = true;
+            if (powerStatus.PowerLineStatus == PowerLineStatus.Online)
             {
-                Icon = CreateIcon(GetBatteryPercentage()),
-                Visible = true,
-                Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - (timeLeft / 3600)) / 60} Minutes",
-            };
+                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\nCharging...";
+            }
+            else
+            {
+                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+            }
 
             ContextMenuStrip menu = new ContextMenuStrip();
 
