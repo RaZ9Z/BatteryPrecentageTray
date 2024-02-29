@@ -45,7 +45,6 @@ namespace BatteryPrecentageTray
                 }
             }
 
-            // Method to raise the ChargingStatusChanged event
             protected virtual void OnChargingStatusChanged()
             {
                 ChargingStatusChanged?.Invoke(this, EventArgs.Empty);
@@ -67,12 +66,14 @@ namespace BatteryPrecentageTray
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             PowerStatusListener powerStatusListener = new PowerStatusListener();
             powerStatusListener.ChargingStatusChanged += OnChargingStatusChanged;
-  
+            string batteryPercentage = GetBatteryPercentage();
+            PowerStatus powerStatus = SystemInformation.PowerStatus;
+            int timeLeft = powerStatus.BatteryLifeRemaining;
             notifyIcon = new NotifyIcon
             {
                 Icon = CreateIcon(GetBatteryPercentage()),
                 Visible = true,
-                Text = "Battery Percentage App",
+                Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - (timeLeft / 3600)) / 60} Minutes",
             };
 
             ContextMenuStrip menu = new ContextMenuStrip();
@@ -95,15 +96,24 @@ namespace BatteryPrecentageTray
             
             Timer timer = new Timer
             {
-                Interval = 60000, // Set the interval in milliseconds
+                Interval = 60000, //one minute for each refresh
                 Enabled = true
             };
 
             timer.Tick += (sender, e) =>
             {
-                string batteryPercentage = GetBatteryPercentage();
-                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%";
+                batteryPercentage = GetBatteryPercentage();
+                timeLeft = powerStatus.BatteryLifeRemaining;
+                if (powerStatus.PowerLineStatus == PowerLineStatus.Online)
+                {
+                    notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\nCharging...";
+                }
+                else
+                {
+                    notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+                }
                 notifyIcon.Icon = CreateIcon(batteryPercentage);
+
                 
             };
 
@@ -133,21 +143,30 @@ namespace BatteryPrecentageTray
             Application.Exit();
         }
 
-        
+
         // Event handler for the ChargingStatusChanged event
         static void OnChargingStatusChanged(object sender, EventArgs e)
         {
             string batteryPercentage = GetBatteryPercentage();
-            notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%";
+            PowerStatus powerStatus = SystemInformation.PowerStatus;
+            int timeLeft = powerStatus.BatteryLifeRemaining;
+            if (powerStatus.PowerLineStatus == PowerLineStatus.Online)
+            {
+                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\nCharging...";
+            }
+            else
+            { 
+            notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+            }
             notifyIcon.Icon = CreateIcon(batteryPercentage);
         }
         private static Icon CreateIcon(string batteryPercentage)
         {
             int percentage = int.TryParse(batteryPercentage, out int result) ? result : 0;
-            percentage = Math.Max(0, Math.Min(100, percentage)); // Ensure percentage is within 0-100 range
+            percentage = Math.Max(0, Math.Min(100, percentage));
             PowerStatus powerStatus = SystemInformation.PowerStatus;
             bool isCharging = powerStatus.PowerLineStatus == PowerLineStatus.Online;
-            
+
             using (Bitmap bitmap = new Bitmap(128, 128))
             using (Graphics g = Graphics.FromImage(bitmap))
             {
