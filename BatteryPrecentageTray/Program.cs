@@ -78,7 +78,7 @@ namespace BatteryPrecentageTray
             }
             else
             {
-                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n{timeLeft / 3600} Hours and {((timeLeft - timeLeft / 3600) / 60) % 60} Minutes";
             }
 
             ContextMenuStrip menu = new ContextMenuStrip();
@@ -115,7 +115,7 @@ namespace BatteryPrecentageTray
                 }
                 else
                 {
-                    notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+                    notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n{timeLeft / 3600} Hours and {((timeLeft - timeLeft / 3600) / 60) % 60} Minutes";
                 }
                 notifyIcon.Icon = CreateIcon(batteryPercentage);
 
@@ -161,7 +161,7 @@ namespace BatteryPrecentageTray
             }
             else
             {
-                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n {timeLeft / 3600} Hours and {(timeLeft - timeLeft / 3600) / 60} Minutes";
+                notifyIcon.Text = $"Battery Percentage: {batteryPercentage}%\n{timeLeft / 3600} Hours and {((timeLeft - timeLeft / 3600) / 60) % 60} Minutes";
             }
             notifyIcon.Icon = CreateIcon(batteryPercentage);
         }
